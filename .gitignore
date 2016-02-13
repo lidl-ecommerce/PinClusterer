@@ -1,0 +1,8 @@
+*.iml
+.idea/
+*.log
+npm-debug.log*
+*.pid
+*.seed
+.grunt
+node_modules

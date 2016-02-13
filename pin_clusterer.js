@@ -1,26 +1,8 @@
 /**
  * https://github.com/rtsinani/PinClusterer/
  */
-(function () {
-
-    var _defaults = {
-            debug: false,
-            pinTypeName: 'pin_clusterer pin',
-            clusterTypeName: 'pin_clusterer cluster',
-            pinSize: 16,
-            extendMapBoundsBy: 2,
-            gridSize: 60,
-            maxZoom: 16,
-            clickToZoom: true,
-            onClusterToMap: null
-        },
-
-    // Minimum zoom level before bounds dissappear
-        MIN_ZOOM = 2,
-
-    // Alias for Microsoft.Maps
-        mm = null;
-
+(function PinClustererClass() {
+    'use strict';
     /**
      * @param { Microsoft.Maps.Map } map: the map to be show the clusters on
      * @param { Object } options: support the following options:
@@ -39,7 +21,26 @@
      *
      */
 
-    var PinClusterer = window.PinClusterer = function (map, options) {
+    var PinClusterer;
+    var _defaults = {
+        debug: false,
+        pinTypeName: 'pin_clusterer pin',
+        clusterTypeName: 'pin_clusterer cluster',
+        pinSize: 16,
+        extendMapBoundsBy: 2,
+        gridSize: 60,
+        maxZoom: 16,
+        clickToZoom: true,
+        onClusterToMap: null
+    };
+
+    // Minimum zoom level before bounds dissappear
+    var MIN_ZOOM = 2;
+
+    // Alias for Microsoft.Maps
+    var mm = null;
+
+    PinClusterer = function PinClusterer(map, options) {
         this.map = map;
         this.options = options;
         this.layer = null;
@@ -58,12 +59,18 @@
         }
     };
 
+    window.PinClusterer = PinClusterer;
+
     PinClusterer.prototype = {
 
-        cluster: function (latlongs) {
-            if (!this.loaded) return;
+        cluster: function cluster(latlongs) {
+            if (!this.loaded) {
+                return;
+            }
             if (!latlongs) {
-                if (!this._latlongs) return;
+                if (!this._latlongs) {
+                    return;
+                }
             } else {
                 this._latlongs = latlongs;
             }
@@ -71,15 +78,21 @@
             if (this._viewchangeendHandler) {
                 this._redraw();
             } else {
-                this._viewchangeendHandler = mm.Events.addHandler(this.map, 'viewchangeend', function () {
-                    self._redraw();
-                });
+                this._viewchangeendHandler = mm.Events.addHandler(this.map, 'viewchangeend',
+                    function _viewchangeendHandlerCallback() {
+                        self._redraw();
+                    });
             }
         },
 
-        _redraw: function () {
-            if (_defaults.debug) var started = new Date();
-            if (!this._latlongs) return;
+        _redraw: function _redraw() {
+            var started;
+            if (_defaults.debug) {
+                started = new Date();
+            }
+            if (!this._latlongs) {
+                return;
+            }
             this._metersPerPixel = this.map.getMetersPerPixel();
             this._bounds = this.getExpandedBounds(this.map.getBounds(), _defaults.extendMapBoundsBy);
             this._zoom = this.map.getZoom();
@@ -88,15 +101,19 @@
             this.layer.clear();
             this.each(this._latlongs, this._addToClosestCluster);
             this.toMap();
-            if (_defaults.debug && started) _log((new Date()) - started);
+            if (_defaults.debug && started) {
+                _log((new Date()) - started);
+            }
         },
 
-        _addToClosestCluster: function (latlong) {
-            var distance = 40000,
-                location = new mm.Location(latlong.latitude, latlong.longitude),
-                clusterToAddTo = null,
-                d;
-            if (this._zoom > MIN_ZOOM && !this._bounds.contains(location)) return;
+        _addToClosestCluster: function _addToClosestCluster(latlong) {
+            var distance = 40000;
+            var location = new mm.Location(latlong.latitude, latlong.longitude);
+            var clusterToAddTo = null;
+            var d;
+            if (this._zoom > MIN_ZOOM && !this._bounds.contains(location)) {
+                return;
+            }
 
             if (this._zoom >= _defaults.maxZoom) {
                 this.doClickToZoom = false;
@@ -104,7 +121,7 @@
                 return;
             }
 
-            this.each(this._clusters, function (cluster) {
+            this.each(this._clusters, function _addToClosestClusterEachCallback(cluster) {
                 d = this._distanceToPixel(cluster.center.location, location);
                 if (d < distance) {
                     distance = d;
@@ -119,27 +136,30 @@
             }
         },
 
-        _createCluster: function (location, data) {
+        _createCluster: function _createCluster(location, data) {
             var cluster = new Cluster(this);
             cluster.add(location, data);
             this._clusters.push(cluster);
         },
 
-        setOptions: function (options) {
-            for (var opt in options)
-                if (typeof _defaults[opt] !== 'undefined') _defaults[opt] = options[opt];
+        setOptions: function setOptions(options) {
+            for (var opt in options) {
+                if (typeof _defaults[opt] !== 'undefined') {
+                    _defaults[opt] = options[opt];
+                }
+            }
         },
 
-        toMap: function () {
-            this.each(this._clusters, function (cluster) {
+        toMap: function toMap() {
+            this.each(this._clusters, function toMapEachCallback(cluster) {
                 cluster.toMap();
             });
         },
 
-        getExpandedBounds: function (bounds, gridFactor) {
-            var northWest = this.map.tryLocationToPixel(bounds.getNorthwest()),
-                southEast = this.map.tryLocationToPixel(bounds.getSoutheast()),
-                size = gridFactor ? _defaults.gridSize * gridFactor : _defaults.gridSize / 2;
+        getExpandedBounds: function getExpandedBounds(bounds, gridFactor) {
+            var northWest = this.map.tryLocationToPixel(bounds.getNorthwest());
+            var southEast = this.map.tryLocationToPixel(bounds.getSoutheast());
+            var size = gridFactor ? _defaults.gridSize * gridFactor : _defaults.gridSize / 2;
             if (northWest && southEast) {
                 northWest = this.map.tryPixelToLocation(new mm.Point(northWest.x - size, northWest.y - size));
                 southEast = this.map.tryPixelToLocation(new mm.Point(southEast.x + size, southEast.y + size));
@@ -150,35 +170,43 @@
             return bounds;
         },
 
-        _distanceToPixel: function (l1, l2) {
+        _distanceToPixel: function _distanceToPixel(l1, l2) {
             return PinClusterer.distance(l1, l2) * 1000 / this._metersPerPixel;
         },
 
-        each: function (items, fn) {
-            if (!items.length) return;
-            for (var i = 0, item; item = items[i]; i++) {
+        each: function each(items, fn) {
+            if (!items.length) {
+                return;
+            }
+            var i;
+            var item;
+            for (i = 0; item = items[i]; i++) {
                 var rslt = fn.apply(this, [item, i]);
-                if (rslt === false) break;
+                if (rslt === false) {
+                    break;
+                }
             }
         }
 
     };
 
-    PinClusterer.distance = function (p1, p2) {
-        if (!p1 || !p2) return 0;
-        var R = 6371, // Radius of the Earth in km
-            pi180 = Math.PI / 180;
-        dLat = (p2.latitude - p1.latitude) * pi180,
-            dLon = (p2.longitude - p1.longitude) * pi180,
-            a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(p1.latitude * pi180) * Math.cos(p2.latitude * pi180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2),
-            c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)),
-            d = R * c;
-        return d;
+    PinClusterer.distance = function distance(p1, p2) {
+        if (!p1 || !p2) {
+            return 0;
+        }
+        var R = 6371;
+        var pi180 = Math.PI / 180;
+        var dLat = (p2.latitude - p1.latitude) * pi180;
+        var dLon = (p2.longitude - p1.longitude) * pi180;
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(p1.latitude * pi180) * Math.cos(p2.latitude * pi180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var distance = (R * c);
+        return distance;
     };
 
-    var Cluster = function (pinClusterer) {
+    var Cluster = function Cluster(pinClusterer) {
         this._pinClusterer = pinClusterer;
         this.locations = [];
         this.center = null;
@@ -188,8 +216,10 @@
     };
 
     Cluster.prototype = {
-        add: function (location, data) {
-            if (this._alreadyAdded(location)) return;
+        add: function add(location, data) {
+            if (this._alreadyAdded(location)) {
+                return;
+            }
             this.locations.push(location);
             this.length += 1;
             if (!this.center) {
@@ -204,59 +234,69 @@
             }
         },
 
-        containsWithinBorders: function (location) {
-            if (this._bounds) return this._bounds.contains(location);
+        containsWithinBorders: function containsWithinBorders(location) {
+            if (this._bounds) {
+                return this._bounds.contains(location);
+            }
             return false;
         },
 
-        zoom: function () {
+        zoom: function zoom() {
+            var zoom = this._pinClusterer.map.getZoom();
             this._pinClusterer.map.setView({
-                center: this.center.location,
-                zoom: (this._pinClusterer.map.getZoom() <= _defaults.maxZoom + 2) ? this._pinClusterer.map.getZoom() + 2 : _defaults.maxZoom }
+                    center: this.center.location,
+                    zoom: (zoom <= _defaults.maxZoom + 2) ? zoom + 2 : _defaults.maxZoom
+                }
             );
         },
 
-        _alreadyAdded: function (location) {
+        _alreadyAdded: function _alreadyAdded(location) {
             if (this.locations.indexOf) {
                 return this.locations.indexOf(location) > -1;
             } else {
-                for (var i = 0, l; l = this.locations[i]; i++) {
-                    if (l === location) return true;
+                var i;
+                var l;
+                for (i = 0; l = this.locations[i]; i++) {
+                    if (l === location) {
+                        return true;
+                    }
                 }
             }
             return false;
         },
 
-        _calculateBounds: function () {
+        _calculateBounds: function _calculateBounds() {
             var bounds = mm.LocationRect.fromLocations(this.center.location);
             this._bounds = this._pinClusterer.getExpandedBounds(bounds);
         },
 
-        toMap: function () {
+        toMap: function toMap() {
             this._updateCenter();
             this.center.toMap(this._pinClusterer.layer);
-            if (!_defaults.debug) return;
-            var north = this._bounds.getNorth(),
-                east = this._bounds.getEast(),
-                west = this._bounds.getWest(),
-                south = this._bounds.getSouth(),
-                nw = new mm.Location(north, west),
-                se = new mm.Location(south, east),
-                ne = new mm.Location(north, east)
-            sw = new mm.Location(south, west),
-                color = new mm.Color(100, 100, 0, 100),
-                poly = new mm.Polygon([nw, ne, se, sw], { fillColor: color, strokeColor: color, strokeThickness: 1 });
+            if (!_defaults.debug) {
+                return;
+            }
+            var north = this._bounds.getNorth();
+            var east = this._bounds.getEast();
+            var west = this._bounds.getWest();
+            var south = this._bounds.getSouth();
+            var nw = new mm.Location(north, west);
+            var se = new mm.Location(south, east);
+            var ne = new mm.Location(north, east);
+            var sw = new mm.Location(south, west);
+            var color = new mm.Color(100, 100, 0, 100);
+            var poly = new mm.Polygon([nw, ne, se, sw], {fillColor: color, strokeColor: color, strokeThickness: 1});
             this._pinClusterer.layer.push(poly);
         },
 
-        _updateCenter: function () {
-            var typeName = _defaults.pinTypeName,
-                count = this.locations.length;
+        _updateCenter: function _updateCenter() {
+            var typeName = _defaults.pinTypeName;
+            var count = this.locations.length;
             if (count > 1) {
                 typeName = _defaults.clusterTypeName;
             }
             this.center.pushpin.setOptions({
-                "typeName": typeName
+                'typeName': typeName
             });
             if (_defaults.onClusterToMap) {
                 _defaults.onClusterToMap.apply(this._pinClusterer, [this.center.pushpin, this]);
@@ -264,7 +304,7 @@
         }
     };
 
-    var Pin = function (location, cluster, options) {
+    var Pin = function Pin(location, cluster, options) {
         this.location = location;
         this._cluster = cluster;
 
@@ -275,35 +315,40 @@
         this._options.typeName = this._options.typeName || _defaults.pinTypeName;
         this._options.height = _defaults.pinSize;
         this._options.width = _defaults.pinSize;
+
         //this._options.anchor = new mm.Point(_defaults.pinSize / 2, _defaults.pinSize / 2);
         this._options.textOffset = new mm.Point(0, 2);
         this._create();
     };
 
     Pin.prototype = {
-        _create: function () {
+        _create: function _create() {
             this.pushpin = new mm.Pushpin(this.location, this._options);
             var self = this;
-            mm.Events.addHandler(this.pushpin, 'click', function (e) {
+            mm.Events.addHandler(this.pushpin, 'click', function mmClick(e) {
+                if (!$) {
+                    return false;
+                }
                 var id = e.target._text;
-                var element = $(".store-index[data-index='" + id + "']")
+                var $element = $('.store-index[data-index="' + id + '"]');
 
-                if ($(element).length === 1) {
-                    $(element).trigger('click');
+                if ($($element).length === 1) {
+                    $($element).trigger('click');
                 } else if (self._cluster.doClickToZoom) {
                     self._cluster.zoom();
                 }
             });
         },
 
-        toMap: function (layer) {
+        toMap: function toMap(layer) {
             layer.push(this.pushpin);
         }
     };
 
-
-    var _log = function (msg) {
-        if (console && console.log) console.log(msg);
+    var _log = function _log(msg) {
+        if (console && console.log) {
+            console.log(msg);
+        }
     };
 
 })();
