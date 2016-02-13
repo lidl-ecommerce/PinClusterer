@@ -1,0 +1,23 @@
+{
+  "name": "PinClusterer",
+  "homepage": "https://github.com/lidl-ecommerce/PinClusterer",
+  "authors": [
+    "Artan Sinani <artisinani@gmail.com>",
+    "Foued Dghaies <foued.dghaies@lidl.com>"
+  ],
+  "description": "Clusters the closest pushpins together on Bing Map",
+  "main": "pin_clusterer.js",
+  "moduleType": [],
+  "keywords": [
+    "bingmaps",
+    "pinscluster"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
