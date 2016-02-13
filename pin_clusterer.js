@@ -324,22 +324,13 @@
     Pin.prototype = {
         _create: function _create() {
             this.pushpin = new mm.Pushpin(this.location, this._options);
-            var self = this;
-            mm.Events.addHandler(this.pushpin, 'click', function mmClick(e) {
-                if (!$) {
-                    return false;
-                }
-                var id = e.target._text;
-                var $element = $('.store-index[data-index="' + id + '"]');
-
-                if ($($element).length === 1) {
-                    $($element).trigger('click');
-                } else if (self._cluster.doClickToZoom) {
+            if (this._cluster.doClickToZoom) {
+                var self = this;
+                mm.Events.addHandler(this.pushpin, 'mouseup', function bindMouseUpEvent() {
                     self._cluster.zoom();
-                }
-            });
+                });
+            }
         },
-
         toMap: function toMap(layer) {
             layer.push(this.pushpin);
         }
