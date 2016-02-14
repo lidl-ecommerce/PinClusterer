@@ -1,11 +1,12 @@
 /**
- * https://github.com/rtsinani/PinClusterer/
+ * https://github.com/lidl-ecommerce/PinClusterer/
  */
 (function PinClustererClass() {
     'use strict';
     /**
-     * @param { Microsoft.Maps.Map } map: the map to be show the clusters on
+     * @param { object } map Microsoft.Maps.Map  the map to be show the clusters on
      * @param { Object } options: support the following options:
+     * @param { object } Microsoft Api Class
      * gridSize: (number) The grid size of a cluster in pixels.
      * maxZoom: (number) The maximum zoom level that a pin can be part of a cluster.
      * onClusterToMap: a function that accepts a parameter pointing at the center of each cluster.
@@ -21,7 +22,6 @@
      *
      */
 
-    var PinClusterer;
     var _defaults = {
         debug: false,
         pinTypeName: 'pin_clusterer pin',
@@ -37,10 +37,13 @@
     // Minimum zoom level before bounds dissappear
     var MIN_ZOOM = 2;
 
-    // Alias for Microsoft.Maps
+    /**
+     * Alias for Microsoft.Maps
+     * @type {object} Microsoft.Maps
+     */
     var mm = null;
 
-    PinClusterer = function PinClusterer(map, options) {
+    var PinClusterer = function PinClusterer(map, options, Microsoft) {
         this.map = map;
         this.options = options;
         this.layer = null;
@@ -58,8 +61,6 @@
             this.loaded = true;
         }
     };
-
-    window.PinClusterer = PinClusterer;
 
     PinClusterer.prototype = {
 
@@ -144,8 +145,11 @@
 
         setOptions: function setOptions(options) {
             for (var opt in options) {
-                if (typeof _defaults[opt] !== 'undefined') {
-                    _defaults[opt] = options[opt];
+                if (options.hasOwnProperty(opt)) {
+                    if (_defaults.hasOwnProperty(opt) && typeof _defaults[opt] !== 'undefined') {
+                        _defaults[opt] = options[opt];
+                    }
+
                 }
             }
         },
@@ -180,7 +184,7 @@
             }
             var i;
             var item;
-            for (i = 0; item = items[i]; i++) {
+            for (i = 0; item = items[i]; i++) { // jshint ignore:line
                 var rslt = fn.apply(this, [item, i]);
                 if (rslt === false) {
                     break;
@@ -202,8 +206,7 @@
             Math.cos(p1.latitude * pi180) * Math.cos(p2.latitude * pi180) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        var distance = (R * c);
-        return distance;
+        return (R * c);
     };
 
     var Cluster = function Cluster(pinClusterer) {
@@ -242,10 +245,10 @@
         },
 
         zoom: function zoom() {
-            var zoom = this._pinClusterer.map.getZoom();
+            var zoomVal = this._pinClusterer.map.getZoom();
             this._pinClusterer.map.setView({
                     center: this.center.location,
-                    zoom: (zoom <= _defaults.maxZoom + 2) ? zoom + 2 : _defaults.maxZoom
+                    zoom: (zoomVal <= _defaults.maxZoom + 2) ? zoomVal + 2 : _defaults.maxZoom
                 }
             );
         },
@@ -256,7 +259,7 @@
             } else {
                 var i;
                 var l;
-                for (i = 0; l = this.locations[i]; i++) {
+                for (i = 0; l = this.locations[i]; i++) { // jshint ignore:line
                     if (l === location) {
                         return true;
                     }
@@ -342,4 +345,17 @@
         }
     };
 
+    /* expose PinClusterer */
+    window.PinClusterer = PinClusterer;
+
+    /* expose PinClusterer */
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        // CommonJS, just export
+        module.exports = PinClusterer;
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD support
+        define('PinClusterer', function PinClustererDef() {
+            return PinClusterer;
+        });
+    }
 })();
