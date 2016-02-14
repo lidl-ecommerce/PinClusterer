@@ -43,7 +43,8 @@
      */
     var mm = null;
 
-    var PinClusterer = function PinClusterer(map, options, Microsoft) {
+    var PinClusterer = function PinClusterer(map, options, microsoft) {
+        var Microsoft = microsoft ? microsoft : window.Microsoft;
         this.map = map;
         this.options = options;
         this.layer = null;

@@ -25,7 +25,7 @@
 			var map = new Microsoft.Maps.Map(document.getElementById('map'), {
 					credentials: 'AkA5N0re9Y6eNV2XYLEjavUbXvB98UwCO5MzvCMBN2QJfgdmF-hTgNyZPNom2I95' 
 				}),					
-				pinClusterer = new PinClusterer(map);
+				pinClusterer = new PinClusterer(map,{},Microsoft);
 			map.setView({ center: new Microsoft.Maps.Location(data[0].latitude, data[0].longitude), zoom: 12 });
 			pinClusterer.cluster(data);
 		};
