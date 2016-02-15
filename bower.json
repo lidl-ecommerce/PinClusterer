@@ -8,6 +8,7 @@
   "description": "Clusters the closest pushpins together on Bing Map",
   "main": "pin_clusterer.js",
   "moduleType": [],
+  "version": "0.0.1",
   "keywords": [
     "bingmaps",
     "pinscluster"
