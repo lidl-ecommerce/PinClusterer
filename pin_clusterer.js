@@ -228,8 +228,9 @@
             this.length += 1;
             if (!this.center) {
                 var options;
-                if (data && data.text) {
-                    options = {text: data.text};
+                console.log('drin', data)
+                if (data) {
+                    options = data;
                 } else {
                     options = {};
                 }
