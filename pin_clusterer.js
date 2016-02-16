@@ -228,7 +228,6 @@
             this.length += 1;
             if (!this.center) {
                 var options;
-                console.log('drin', data)
                 if (data) {
                     options = data;
                 } else {
